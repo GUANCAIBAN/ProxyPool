@@ -95,19 +95,19 @@ def communicate(sock1, sock2):
     """
 
     try:
-        while 1:
+        while 1:       # 死循环
             data = sock1.recv(1024)
             # print(data.decode('utf-8'))
             # print(data)
             if not data:
                 return
             sock2.sendall(data)
-    except Exception as e :
+    except Exception as e:
         # print(e)
         pass
  
  
-def handle(client):
+def handle(client):  # 每次创建的进程
     """
     处理连接进来的客户端
     :param client:
@@ -115,11 +115,12 @@ def handle(client):
     """
     timeout = 6
     client.settimeout(timeout)
-    header = Header(client)
+    header = Header(client)  # 头部的初始化
     if not header.data:
         client.close()
         return
-    print("==========>>>>>>>>> ",header.get_host_info()[0],header.get_host_info()[1], header.get_method().decode('utf-8'))
+    # 输出头部信息
+    print("==========>>>>>>>>> ", header.get_host_info()[0], header.get_host_info()[1], header.get_method().decode('utf-8'))
     # print(header._header.decode("utf8"))
 
     # print(header.data)
@@ -127,8 +128,8 @@ def handle(client):
     flag = 1
     while flag:
         try:
-            server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            proxy = enable_ip()
+            server = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # 连接
+            proxy = enable_ip() # 获取随机一个代理IP:port
             proxyHost,proxyPort = proxy.split(":")[0],int(proxy.split(":")[1])
             socks.set_default_proxy(socks.PROXY_TYPE_SOCKS5,addr=proxyHost,port=int(proxyPort))
             socket.socket = socks.socksocket
@@ -158,17 +159,22 @@ def serve(ip, port):
     :param ip:
     :param port:
     :return:
+    设置sock连接，绑定ip跟端口，作死循环
     """
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     s.bind((ip, port))
     s.listen(100)
-    print('proxy start...',port)
+    print('proxy start...', port)
     while True:
-        conn, addr = s.accept()
-        if conn:
+        conn, addr = s.accept()  # socket.accept
+        if conn:  # 这个应该是如果存在，创建进程handle
             _thread.start_new_thread(handle, (conn,))
 def enable_ip():
+    """
+    将爬取的代理池txt，放入ip[]中，随机取一个ip并返回
+    (如果要换IP，也是从这里去修改，无论是从网上拿还是咋的)
+    """
     import random
     ip = []
     fr =open("alive.txt",'r')
