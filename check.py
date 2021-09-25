@@ -85,6 +85,9 @@ def get_pool(check_queue,check_file):
     quc.close()
 
 if __name__ == '__main__':
+    """
+    检查代理池的相关信息:是否存活等
+    """
     from queue import Queue
 
     vul_list = []

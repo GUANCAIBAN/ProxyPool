@@ -128,21 +128,22 @@ def handle(client):  # 每次创建的进程
     flag = 1
     while flag:
         try:
+            """连接，设置代理"""
             server = socket.socket(socket.AF_INET, socket.SOCK_STREAM) # 连接
             proxy = enable_ip() # 获取随机一个代理IP:port
-            proxyHost,proxyPort = proxy.split(":")[0],int(proxy.split(":")[1])
-            socks.set_default_proxy(socks.PROXY_TYPE_SOCKS5,addr=proxyHost,port=int(proxyPort))
+            proxyHost,proxyPort = proxy.split(":")[0],int(proxy.split(":")[1]) #IP,port
+            socks.set_default_proxy(socks.PROXY_TYPE_SOCKS5,addr=proxyHost,port=int(proxyPort)) # 设置全局代理
             socket.socket = socks.socksocket
             server.settimeout(timeout)
-            server.connect(header.get_host_info())
-            print("socks5: ",proxyHost,proxyPort)
+            server.connect(header.get_host_info()) # 获取目标主机的ip和端口
+            print("socks5: ", proxyHost, proxyPort)
             flag = 0
         except Exception as e:
             print(e)
     try:
-        if header.is_ssl():
+        if header.is_ssl(): # 判断是否是http协议
             data = b"HTTP/1.0 200 Connection Established\r\n\r\n"
-            client.sendall(data)
+            client.sendall(data)  # 然后再次开启进程
             _thread.start_new_thread(communicate, (client, server))
         else:
             server.sendall(header.data)
@@ -159,8 +160,10 @@ def serve(ip, port):
     :param ip:
     :param port:
     :return:
-    设置sock连接，绑定ip跟端口，作死循环
+
     """
+
+    """设置sock连接，绑定ip跟端口，作死循环,循环里创建新线程"""
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     s.bind((ip, port))
@@ -185,6 +188,9 @@ def enable_ip():
     return ip[tag]
  
 if __name__ == '__main__':
+    """
+    所以其实代码就那么点，应该是python好实现。在check.py文件中检查IP等内容;server.py执行功能代码
+    """
     IP = "0.0.0.0"
     PORT = 8082
     serve(IP, PORT)
