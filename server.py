@@ -141,7 +141,7 @@ def handle(client):  # 每次创建的进程
         except Exception as e:
             print(e)
     try:
-        if header.is_ssl(): # 判断是否是http协议
+        if header.is_ssl():  # 判断是否是http协议
             data = b"HTTP/1.0 200 Connection Established\r\n\r\n"
             client.sendall(data)  # 然后再次开启进程
             _thread.start_new_thread(communicate, (client, server))
@@ -190,6 +190,16 @@ def enable_ip():
 if __name__ == '__main__':
     """
     所以其实代码就那么点，应该是python好实现。在check.py文件中检查IP等内容;server.py执行功能代码
+    使用burp绑定端口和设置代理。
+    socket就是一种协议，可以上网用的，跟http似的，所以我们可以使用其他IP走这个协议，实现代理
+    通信原理图放在readme的开头了
+    代理的流程如下：
+
+1.localhost:1080经过sock5协议后，就知道要访问google了
+2.local程序会把流量加密，然后把普通的TCP流量发往海外服务器；
+3.海外服务器收到请求后，解密得到要访问google
+4.海外服务器请求google后把得到的数据加密返回给local
+5.local解密返回给browser。
     """
     IP = "0.0.0.0"
     PORT = 8082
